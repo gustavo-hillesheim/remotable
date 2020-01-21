@@ -1,4 +1,4 @@
-package io.hill.remoteclasses.socket;
+package io.hill.remotable.socket;
 
 import lombok.Getter;
 import lombok.Setter;

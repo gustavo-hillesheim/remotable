@@ -1,23 +1,24 @@
-package io.hill.remoteclasses.socket;
+package io.hill.remotable.socket;
+
+import lombok.NoArgsConstructor;
 
 import java.io.*;
 import java.net.Socket;
 
-public class SocketHandler {
+@NoArgsConstructor
+public class SocketClient {
 
-	private Socket client;
-	private SocketServer server;
+	private Socket socket;
 	private BufferedReader reader;
 	private BufferedWriter writer;
 
-	SocketHandler(Socket client, SocketServer server) throws IOException {
+	public void connect(String host, Integer port) throws IOException {
 
-		this.client = client;
-		this.server = server;
-		setupClient(client);
+		socket = new Socket(host, port);
+		setupSocket(socket);
 	}
 
-	protected void setupClient(Socket socket) throws IOException {
+	protected void setupSocket(Socket socket) throws IOException {
 
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -49,14 +50,12 @@ public class SocketHandler {
 			writer.close();
 			writer = null;
 
-			client.close();
-			client = null;
-
-			server = null;
+			socket.close();
+			socket = null;
 		}
 	}
 
 	public boolean isConnected() {
-		return client != null && client.isConnected();
+		return socket != null && socket.isConnected();
 	}
 }

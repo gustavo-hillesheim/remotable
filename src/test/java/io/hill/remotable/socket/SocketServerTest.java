@@ -1,4 +1,4 @@
-package io.hill.remoteclasses.socket;
+package io.hill.remotable.socket;
 
 import org.junit.Test;
 
