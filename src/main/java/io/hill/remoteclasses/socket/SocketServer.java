@@ -13,51 +13,82 @@ import java.util.List;
 @Setter
 public class SocketServer {
 
-	protected ServerSocket socket;
-	protected List<SocketClientHandler> clientHandlers = new ArrayList<>();
-	protected boolean started;
+	protected ServerSocket serverSocket;
+	protected List<SocketHandler> socketHandlers = new ArrayList<>();
+	protected boolean running;
 	protected Thread serverThread;
 
 	public void listen(Integer port) throws IOException {
 
-		if (!started) {
+		if (!running) {
 
-			socket = new ServerSocket(port);
-			started = true;
+			serverSocket = new ServerSocket(port);
 			serverThread = new Thread(this::run);
+			serverThread.start();
+			running = true;
 		}
 	}
 
 	protected void run() {
 
-		while (started) {
+		while (running) {
 
+			acceptConnections();
+		}
+	}
+
+	private void acceptConnections() {
+
+		Socket socket = null;
+		try {
+			socket = this.serverSocket.accept();
+			SocketHandler socketClientHandler = new SocketHandler(socket, this);
+			socketHandlers.add(socketClientHandler);
+		} catch (IOException e) {
+
+			closeSocket(socket);
+			handleAcceptException(e);
+		}
+	}
+
+	private void closeSocket(Socket socket) {
+
+		if (socket != null) {
 			try {
-
-				Socket socket = acceptClient();
-				SocketClientHandler socketClientHandler = createHandler(socket);
-				clientHandlers.add(socketClientHandler);
+				socket.close();
 			} catch (IOException e) {
-
-				handleAcceptException(e);
+				e.printStackTrace();
 			}
 		}
 	}
 
-	private Socket acceptClient() throws IOException {
+	public void close() throws IOException {
 
-		return this.socket.accept();
+		if (running) {
+
+			for (SocketHandler handler : socketHandlers) {
+				handler.disconnect();
+			}
+			socketHandlers.clear();
+
+			serverSocket.close();
+			serverSocket = null;
+
+			serverThread.interrupt();
+			serverThread = null;
+
+			running = false;
+		}
 	}
 
-	private SocketClientHandler createHandler(Socket socket) {
+	public void sendAll(String message) throws IOException {
 
-		return new SocketClientHandler(createClient(socket), this);
+		for (SocketHandler handler : socketHandlers) {
+			handler.send(message);
+		}
 	}
 
-	private SocketClient createClient(Socket socket) {
-
-		return new SocketClient(socket);
+	private void handleAcceptException(IOException e) {
+		e.printStackTrace();
 	}
-
-	private void handleAcceptException(IOException e) {}
 }
