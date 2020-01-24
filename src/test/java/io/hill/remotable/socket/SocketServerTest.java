@@ -16,7 +16,7 @@ public class SocketServerTest {
 		final String clientMessage = "Hello from client";
 
 		SocketServer server = new SocketServer();
-		server.listen(4000);
+		server.open(4000);
 		assertTrue(server.isRunning());
 
 		SocketClient client = new SocketClient();
@@ -24,8 +24,9 @@ public class SocketServerTest {
 
 		Thread.sleep(10);
 
-		assertEquals(1, server.getSocketHandlers().size());
-		SocketHandler clientHandler = server.getSocketHandlers().get(0);
+		assertEquals(1, server.getSocketHandlerPools().size());
+		assertEquals(1, server.getSocketHandlerPools().get(0).getHandlers().size());
+		SocketHandler clientHandler = server.getSocketHandlerPools().get(0).getHandlers().get(0);
 
 		server.sendAll(serverMessage);
 		client.waitForMessages();
@@ -43,6 +44,6 @@ public class SocketServerTest {
 
 		assertFalse(server.isRunning());
 		assertFalse(clientHandler.isConnected());
-		assertEquals(0, server.getSocketHandlers().size());
+		assertEquals(0, server.getSocketHandlerPools().get(0).getHandlers().size());
 	}
 }
