@@ -1,4 +1,4 @@
-package io.hill.remotable.proxy.invocation.client;
+package io.hill.remotable.proxy.client;
 
 import io.hill.remotable.proxy.invocation.MethodInvocation;
 import lombok.RequiredArgsConstructor;

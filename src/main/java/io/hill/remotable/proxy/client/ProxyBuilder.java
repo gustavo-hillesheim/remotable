@@ -1,8 +1,7 @@
-package io.hill.remotable.proxy;
+package io.hill.remotable.proxy.client;
 
+import io.hill.remotable.exception.BuildingException;
 import io.hill.remotable.exception.ObjectInstantiationException;
-import io.hill.remotable.proxy.invocation.client.RemoteInvocationHandler;
-import io.hill.remotable.proxy.invocation.client.RemoteMethodCaller;
 import io.hill.remotable.socket.SocketClient;
 import io.hill.remotable.utils.ObjectInstantiator;
 import lombok.AccessLevel;
@@ -17,7 +16,9 @@ public class ProxyBuilder<T> {
 
 	private ObjectInstantiator objectInstantiator = new ObjectInstantiator();
 
+	private T target;
 	private Class<T> targetClass;
+	private RemoteMethodCaller remoteMethodCaller;
 	private Class<? extends RemoteMethodCaller> remoteMethodCallerClass;
 	private String host;
 	private Integer port;
@@ -42,14 +43,32 @@ public class ProxyBuilder<T> {
 		return this;
 	}
 
-	public T build() throws ObjectInstantiationException, IOException {
-		SocketClient socketClient = new SocketClient();
-		socketClient.connect(host, port);
+	public T build() throws BuildingException, ObjectInstantiationException, IOException {
+		this.createTarget();
+		this.createRemoteMethodCaller();
 
-		T target = objectInstantiator.instantiate(targetClass);
-		RemoteMethodCaller remoteMethodCaller = objectInstantiator.instantiate(remoteMethodCallerClass, socketClient);
+		return createProxy(this.target, new RemoteInvocationHandler(this.target, this.remoteMethodCaller));
+	}
 
-		return createProxy(target, new RemoteInvocationHandler(target, remoteMethodCaller));
+	private void createTarget() throws BuildingException, ObjectInstantiationException {
+		if (targetClass == null) {
+			throw BuildingException.undefinedField("targetClass");
+		} else {
+			this.target = this.objectInstantiator.instantiate(targetClass);
+		}
+	}
+
+	private void createRemoteMethodCaller() throws BuildingException, ObjectInstantiationException, IOException {
+		if (remoteMethodCaller != null) {
+			return;
+		}
+		if (remoteMethodCallerClass == null) {
+			throw BuildingException.undefinedField("remoteMethodCaller");
+		} else {
+			SocketClient socketClient = new SocketClient();
+			socketClient.connect(host, port);
+			this.remoteMethodCaller = this.objectInstantiator.instantiate(remoteMethodCallerClass, socketClient);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -9,6 +9,7 @@ public class Constants {
 		public static final String METHOD_NOT_FOUND = "A public method %s was not found in class %s.";
 		public static final String INVALID_ARGUMENTS = "Method %s in class %s could not be invoked using arguments %s.";
 		public static final String INTERNAL_METHOD_EXCEPTION = "method %s in class %s threw an exception: %s.";
+		public static final String UNDEFINED_FIELD = "Value of field %s was not defined.";
 	}
 
 	public static class Socket {

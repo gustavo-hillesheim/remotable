@@ -1,6 +1,5 @@
-package io.hill.remotable.proxy.invocation.server;
+package io.hill.remotable.proxy.server;
 
-import com.machinezoo.noexception.Exceptions;
 import io.hill.remotable.Constants;
 import io.hill.remotable.exception.MethodInvocationException;
 import io.hill.remotable.proxy.invocation.MethodInvocation;
@@ -17,9 +16,9 @@ public class RemoteMethodInvoker<T> {
 
 	private Map<String, Method> methodMap = new HashMap<>();
 
-	public RemoteMethodInvoker(T target) {
+	public RemoteMethodInvoker(Class<T> targetClass) {
 
-		Method[] methods = target.getClass().getMethods();
+		Method[] methods = targetClass.getMethods();
 		Stream.of(methods)
 			.filter(method -> Modifier.isPublic(method.getModifiers()))
 			.forEach(method -> methodMap.put(method.getName(), method));
